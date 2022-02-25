@@ -1,0 +1,31 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+    <var name="user" class="com.xa.entity.User"/>
+    <var name="loginServiceImpl" class="com.xa.service.impl.LoginServiceImpl"/>
+
+    <view-state id="login" view="login/login" model="user">
+        <secured attributes="ROLE_USER, ROLE_ADMIN" match="any"/>
+        <transition on="login" to="performLogin"/>
+        <transition on="cancel" to="home"/>
+    </view-state>
+
+    <action-state id="performLogin">
+        <evaluate expression="loginServiceImpl.loginProcess(user)"/>
+        <transition on="true" to="success"/>
+        <transition on="false" to="loginFailed"/>
+    </action-state>
+
+    <view-state id="loginFailed" view="login/login-failure" model="user">
+        <transition on="retry" to="login"/>
+        <transition on="cancel" to="home"/>
+    </view-state>
+
+    <end-state id="home" view="externalRedirect:contextRelative:/"/>
+    <end-state id="success" view="login/login-success"/>
+
+    <global-transitions>
+        <transition on="home" to="home"/>
+    </global-transitions>
+</flow>

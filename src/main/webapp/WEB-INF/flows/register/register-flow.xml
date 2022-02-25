@@ -1,0 +1,36 @@
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
+
+    <var name="user" class="com.xa.entity.User"/>
+    <var name="registerServiceImpl" class="com.xa.service.impl.RegisterServiceImpl"/>
+
+    <view-state id="register" view="register/register" model="user">
+        <secured attributes="ROLE_USER, ROLE_ADMIN" match="any"/>
+        <transition on="nextStep" to="registerStep2"/>
+        <transition on="cancel" to="home"/>
+    </view-state>
+
+    <view-state id="registerStep2" view="register/register-step2" model="user">
+        <transition on="register" to="performRegisterAction"/>
+        <transition on="back" to="register"/>
+    </view-state>
+
+    <action-state id="performRegisterAction">
+        <evaluate expression="registerServiceImpl.register(user)"/>
+        <transition on="true" to="success"/>
+        <transition on="false" to="retryRegisterStep"/>
+    </action-state>
+
+    <view-state id="retryRegisterStep" view="register/register-failure" model="user">
+        <transition on="retry" to="register"/>
+        <transition on="home" to="home"/>
+    </view-state>
+
+    <end-state id="home" view="externalRedirect:contextRelative:/"/>
+    <end-state id="success" view="register/register-success"/>
+
+    <global-transitions>
+        <transition on="home" to="home"/>
+    </global-transitions>
+</flow>
